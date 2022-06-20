@@ -1,0 +1,74 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Create New Match!{% endblock %}
+
+{% block body %}
+
+
+<div class="example-wrapper">
+    <h1> Create New Match </h1>
+
+    <form action="{{ path('create') }}" method="post" id="createMatch">
+    <table class="styled-table">
+        <thead>
+        <tr>
+            <th>Home Team</th>
+            <th>Away Team</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>
+                    <section>
+                            <select id="homeTeamId" name="homeTeamId">
+                                <option value="0"> - Please Select - </option>
+                                {% for key,value in countries %}
+                                <option value="{{ value.id }}"> {{ value.name }} </option>
+                                {% endfor %}
+                            </select>
+                    </section>
+                </td>
+                <td>
+                    <section>
+                            <select id="awayTeamId" name="awayTeamId">
+                                     <option value="0"> - Please Select - </option>
+                                    {% for key,value in countries %}
+                                    <option value="{{ value.id }}"> {{ value.name }} </option>
+                                    {% endfor %}
+                            </select>
+                    </section>
+                </td>
+                <td>
+                    <input type="button" value="Submit" onclick="submitForm()">
+                </td>
+            </tr>
+
+        <tr><td style="padding-bottom: 1em;" colspan="3"></td></tr>
+
+        </tbody>
+    </table>
+    </form>
+
+</div>
+
+    <script>
+        function submitForm(){
+            if($("#awayTeamId").val() == 0 || $("#homeTeamId").val() == 0){
+                alert('Please select both teams');
+            }else if($("#awayTeamId").val() === $("#homeTeamId").val()){
+                alert('Teams are same, please change');
+            }
+            else{
+                $.ajax({
+                    type: "POST",
+                    url: "{{ path('create') }}",
+                    data: {homeTeamId: $("#homeTeamId").val(),awayTeamId: $("#awayTeamId").val() }
+                }) .done(function(data){
+                    alert(data.message);
+                });
+            }
+        }
+    </script>
+
+{% endblock %}

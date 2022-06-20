@@ -1,0 +1,86 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Active Matches!{% endblock %}
+
+{% block body %}
+<style>
+    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
+    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
+</style>
+
+<div class="example-wrapper">
+    {% if data|length > 0 %}
+        <h1> <span id="activeSign">✅</span> Active Matches : <span id="activeCount">{{ data|length }}</span></h1>
+        <table class="styled-table">
+            <thead>
+            <tr>
+                <th>Match Id</th>
+                <th>Home Team</th>
+                <th>Score</th>
+                <th>Away Team</th>
+                <th>Time Left</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for key,value in data %}
+            <tr>
+                <td>
+                    <strong>{{ key }}</strong>
+                </td>
+                <td>
+                    <strong>{{ value.homeData.name }}</strong>
+                </td>
+                <td>
+                    <strong><span id="{{ key }}-homeScore">{{ value.matchData.homeTeamScore }}</span> - <span id="{{ key }}-awayScore">{{ value.matchData.awayTeamScore }}</span></strong>
+                </td>
+                <td>
+                    <strong>{{ value.awayData.name }}</strong>
+                </td>
+                <td>
+                    <strong><span id="{{ key }}-timeLeft"></span></strong>
+                </td>
+            </tr>
+            {% endfor %}
+
+            <tr><td style="padding-bottom: 1em;" colspan="3"></td></tr>
+
+            </tbody>
+        </table>
+        <span id="checker" style="display: none">{{ data|last.matchData.id }}</span>
+    {% else %}
+        <h1>⛔️ There is no active matches ! </h1>
+        <span id="checker" style="display: none">false</span>
+    {% endif %}
+
+</div>
+
+        <script>
+            setInterval(function(){
+                $.ajax({
+                    type: "POST",
+                    url: "{{ path('activeMatches') }}",
+                    //data: {matchId: 1 }
+                })
+                    .done(function(data){
+                        if (data.status == "Success")
+                        {
+                            $('span#activeCount').html(data.count);
+                            if(data.count > 0){
+                                $('span#activeSign').html('✅');
+                                $.each(data.data, function(k, v) {
+                                    $('span#'+k+'-homeScore').html(v.homeTeamScore);
+                                    $('span#'+k+'-awayScore').html(v.awayTeamScore);
+                                    $('span#'+k+'-timeLeft').html(v.timeLeft);
+                                });
+                            }
+                            if($('span#checker').html() == 'false'){
+                                location.reload();
+                            }
+                        }else if(data.status == "None"){
+                            $('span#activeCount').html(0);
+                            $('span#activeSign').html('⛔');
+                        }
+                    });
+            }, 1000);
+        </script>
+{% endblock %}

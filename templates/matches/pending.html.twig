@@ -1,0 +1,77 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Pending Matches!{% endblock %}
+
+{% block body %}
+<style>
+    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
+    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
+</style>
+
+<div class="example-wrapper">
+    {% if data|length > 0 %}
+        <h1> <span id="activeSign">✅</span> Pending Matches : <span id="activeCount">{{ data|length }}</span></h1>
+        <table class="styled-table">
+            <thead>
+            <tr>
+                <th>Match Id</th>
+                <th>Home Team</th>
+                <th>Away Team</th>
+                <th>Start Match</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for key,value in data %}
+            <tr>
+                <td>
+                    <strong>{{ key }}</strong>
+                </td>
+                <td>
+                    <strong>{{ value.homeData.name }}</strong>
+                </td>
+                <td>
+                    <strong>{{ value.awayData.name }}</strong>
+                </td>
+                <td>
+                    <span name="{{ key }}-startButton" id="{{ key }}-startButton" style="display: block">
+                        <button onclick="startMatch({{ key }})">START MATCH</button>
+                    </span>
+                    <span name="{{ key }}-startedText" id="{{ key }}-startedText" style="display: none"> Match Started</span>
+                </td>
+            </tr>
+            {% endfor %}
+
+            <tr><td style="padding-bottom: 1em;" colspan="3"></td></tr>
+
+            </tbody>
+        </table>
+
+    {% else %}
+        <h1>⛔️ There is no pending matches ! </h1>
+    {% endif %}
+
+</div>
+
+    <script>
+        function startMatch(id){
+            $.ajax({
+                type: "POST",
+                url: "{{ path('startMatch') }}",
+                data: {matchId: id }
+            })
+                .done(function(data){
+                if (data.status == "Success")
+                {
+                    $('span#'+id+'-startButton').hide();
+                    $('span#'+id+'-startedText').show();
+
+                }else if(data.status == "None"){
+                    $('span#activeCount').html(0);
+                    $('span#activeSign').html('⛔');
+                }
+            });
+        }
+    </script>
+
+
+{% endblock %}
